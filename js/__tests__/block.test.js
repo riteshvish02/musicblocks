@@ -1701,7 +1701,7 @@ describe("Block Foundation", () => {
             expect(eventEnter.preventDefault).toHaveBeenCalled();
             expect(block.label.removeEventListener).toHaveBeenCalledWith(
                 "keypress",
-                block._exitKeyPressed
+                block._exitKeyPressedHandler
             );
             expect(document.getElementById("labelDiv").classList.contains("hasKeyboard")).toBe(
                 false
@@ -1718,6 +1718,33 @@ describe("Block Foundation", () => {
             );
 
             global.docById = originalDocById;
+        });
+
+        it("removes the bound key handler after the first exit key", () => {
+            const block = new Block(mockProtoBlock, mockBlocks);
+            block._labelChanged = jest.fn();
+
+            document.body.innerHTML = '<div id="labelDiv" class="hasKeyboard"><input></div>';
+            const originalDocById = global.docById;
+            global.docById = jest.fn(id => document.getElementById(id));
+            block.label = document.querySelector("input");
+
+            try {
+                block.label.addEventListener("keypress", block._exitKeyPressedHandler);
+                const enterKey = () =>
+                    new KeyboardEvent("keypress", {
+                        key: "Enter",
+                        bubbles: true,
+                        cancelable: true
+                    });
+
+                block.label.dispatchEvent(enterKey());
+                block.label.dispatchEvent(enterKey());
+
+                expect(block._labelChanged).toHaveBeenCalledTimes(1);
+            } finally {
+                global.docById = originalDocById;
+            }
         });
 
         it("ignores other keys", () => {

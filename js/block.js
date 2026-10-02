@@ -165,6 +165,7 @@ class Block {
         this._viewportVisible = true; // Is this block within the current viewport?
         this.loadComplete = false; // Has the block finished loading?
         this.label = null; // Editable textview in DOM.
+        this._exitKeyPressedHandler = this._exitKeyPressed.bind(this);
         this.labelattr = null; // Editable textview in DOM.
         this.text = null; // A dynamically generated text label on block itself.
         this.value = null; // Value for number, text, and media blocks.
@@ -4854,7 +4855,7 @@ class Block {
         if (["Enter", "Tab"].includes(event.key)) {
             this._labelChanged(true, false);
             event.preventDefault();
-            this.label.removeEventListener("keypress", this._exitKeyPressed);
+            this.label.removeEventListener("keypress", this._exitKeyPressedHandler);
             docById("labelDiv").classList.remove("hasKeyboard");
         }
     }
