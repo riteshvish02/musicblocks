@@ -316,6 +316,58 @@ describe("Tempo Widget", () => {
 
             expect(() => tempoWidget._updateBPM(0)).not.toThrow();
         });
+
+        test("should safely update target block lacking text property or updateCache", () => {
+            const mockBlock = {
+                connections: [null, 1],
+                name: "setmasterbpm2"
+            };
+            const mockCalcBlock = {
+                name: "plus",
+                value: 100
+                // No .text, no .updateCache
+            };
+
+            mockActivity.blocks.blockList = {
+                0: mockBlock,
+                1: mockCalcBlock
+            };
+            tempoWidget.BPMBlocks[0] = 0;
+            tempoWidget.BPMs[0] = 140;
+
+            expect(() => tempoWidget._updateBPM(0)).not.toThrow();
+            expect(mockCalcBlock.value).toBe(140);
+            expect(mockActivity.refreshCanvas).toHaveBeenCalled();
+            expect(mockActivity.saveLocally).toHaveBeenCalled();
+        });
+
+        test("should sanitize non-positive or NaN BPM values to 30", () => {
+            const mockBlock = {
+                connections: [null, 1],
+                name: "setmasterbpm2"
+            };
+            const mockValueBlock = {
+                value: 100,
+                text: { text: "100" },
+                updateCache: jest.fn()
+            };
+
+            mockActivity.blocks.blockList = {
+                0: mockBlock,
+                1: mockValueBlock
+            };
+            tempoWidget.BPMBlocks[0] = 0;
+
+            tempoWidget.BPMs[0] = 0;
+            tempoWidget._updateBPM(0);
+            expect(tempoWidget._intervals[0]).toBe((60 / 30) * 1000);
+            expect(mockValueBlock.value).toBe(30);
+
+            tempoWidget.BPMs[0] = NaN;
+            tempoWidget._updateBPM(0);
+            expect(tempoWidget._intervals[0]).toBe((60 / 30) * 1000);
+            expect(mockValueBlock.value).toBe(30);
+        });
     });
 
     // --- _saveTempo() and __save() tests ---

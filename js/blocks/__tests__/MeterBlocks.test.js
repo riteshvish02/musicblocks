@@ -493,6 +493,33 @@ describe("MeterBlocks setup", () => {
         expect(logo.tempo.BPMs).toContain("text");
     });
 
+    it("safely handles non-literal connected blocks lacking text property in inTempo mode", () => {
+        const master2Block = getBlock("setmasterbpm2");
+        activity.blocks.blockList.calcMaster = { connections: [null, "calcBlock1"] };
+        activity.blocks.blockList.calcBlock1 = { name: "box", value: 140 }; // No .text property
+
+        logo.inTempo = true;
+        expect(() => master2Block.flow([140, 0.5], logo, 0, "calcMaster")).not.toThrow();
+        expect(logo.tempo.BPMBlocks).toContain("calcMaster");
+        expect(logo.tempo.BPMs).toContain("140");
+
+        const legacyBlock = getBlock("setmasterbpm");
+        activity.blocks.blockList.calcLegacy = { connections: [null, "calcBlock2"] };
+        activity.blocks.blockList.calcBlock2 = { name: "plus", value: 160 }; // No .text property
+
+        expect(() => legacyBlock.flow([160], logo, 0, "calcLegacy")).not.toThrow();
+        expect(logo.tempo.BPMBlocks).toContain("calcLegacy");
+        expect(logo.tempo.BPMs).toContain("160");
+
+        const bpm3Block = getBlock("setbpm3");
+        activity.blocks.blockList.calcBpm3 = { connections: [null, "calcBlock3"] };
+        activity.blocks.blockList.calcBlock3 = { name: "product", value: 180 }; // No .text property
+
+        expect(() => bpm3Block.flow([180, 0.25], logo, 0, "calcBpm3")).not.toThrow();
+        expect(logo.tempo.BPMBlocks).toContain("calcBpm3");
+        expect(logo.tempo.BPMs).toContain("180");
+    });
+
     it("clamps BPM ranges inside FlowClamp blocks and cleans up listeners", () => {
         const block = getBlock("setbpm2");
         const turtle = { singer: { bpm: [] } };

@@ -380,7 +380,9 @@ class Tempo {
      * @returns {void}
      */
     _updateBPM(i) {
-        this._intervals[i] = (60 / this.BPMs[i]) * 1000;
+        const bpmValue = parseFloat(this.BPMs[i]);
+        const safeBPM = Number.isFinite(bpmValue) && bpmValue > 0 ? bpmValue : 30;
+        this._intervals[i] = (60 / safeBPM) * 1000;
 
         if (!this.BPMBlocks || this.BPMBlocks[i] === null || this.BPMBlocks[i] === undefined) {
             return;
@@ -389,22 +391,30 @@ class Tempo {
         const bpmBlock = this.activity.blocks.blockList[this.BPMBlocks[i]];
         if (!bpmBlock) return;
         const blockNumber = bpmBlock.connections[1];
-        if (blockNumber !== null) {
-            this.activity.blocks.blockList[blockNumber].value = parseFloat(this.BPMs[i]);
-            this.activity.blocks.blockList[blockNumber].text.text = this.BPMs[i];
-            this.activity.blocks.blockList[blockNumber].updateCache();
+        if (blockNumber !== null && this.activity.blocks.blockList[blockNumber]) {
+            const targetBlock = this.activity.blocks.blockList[blockNumber];
+            targetBlock.value = safeBPM;
+            if (targetBlock.text && typeof targetBlock.text === "object") {
+                targetBlock.text.text = this.BPMs[i];
+            }
+            if (typeof targetBlock.updateCache === "function") {
+                targetBlock.updateCache();
+            }
             this.activity.refreshCanvas();
             this.activity.saveLocally();
         }
 
-        const bpmValue = parseFloat(this.BPMs[i]);
-        if (bpmBlock.name === "setmasterbpm2" || bpmBlock.name === "setmasterbpm") {
-            Singer.masterBPM = bpmValue;
-            Singer.defaultBPMFactor = TONEBPM / bpmValue;
-        } else if (bpmBlock.name === "setbpm3" || bpmBlock.name === "setbpm2") {
-            for (const tur of this.activity.turtles.turtleList) {
-                if (tur.singer.bpm.length > 0) {
-                    tur.singer.bpm[tur.singer.bpm.length - 1] = bpmValue;
+        if (typeof Singer !== "undefined") {
+            if (bpmBlock.name === "setmasterbpm2" || bpmBlock.name === "setmasterbpm") {
+                Singer.masterBPM = safeBPM;
+                Singer.defaultBPMFactor = typeof TONEBPM !== "undefined" ? TONEBPM / safeBPM : 1;
+            } else if (bpmBlock.name === "setbpm3" || bpmBlock.name === "setbpm2") {
+                if (this.activity && this.activity.turtles && this.activity.turtles.turtleList) {
+                    for (const tur of this.activity.turtles.turtleList) {
+                        if (tur.singer && tur.singer.bpm && tur.singer.bpm.length > 0) {
+                            tur.singer.bpm[tur.singer.bpm.length - 1] = safeBPM;
+                        }
+                    }
                 }
             }
         }
