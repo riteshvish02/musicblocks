@@ -2713,7 +2713,7 @@ class Singer {
                                         );
                                     }
 
-                                    if (!tur.singer.suppressOutput) {
+                                    if (!tur.singer.suppressOutput && !tur.muted) {
                                         activity.logo.synth.trigger(
                                             turtle,
                                             notes,
@@ -2731,7 +2731,7 @@ class Singer {
                                     tur.singer.drumStyle.length > 0 &&
                                     !hasSetTimbreInSetDrum
                                 ) {
-                                    if (!tur.singer.suppressOutput) {
+                                    if (!tur.singer.suppressOutput && !tur.muted) {
                                         activity.logo.synth.trigger(
                                             turtle,
                                             notes,
@@ -2751,7 +2751,7 @@ class Singer {
                                             // Don't play drum if settimbre encountered
                                             !hasSetTimbreInSetDrum
                                         ) {
-                                            if (!tur.singer.suppressOutput) {
+                                            if (!tur.singer.suppressOutput && !tur.muted) {
                                                 activity.logo.synth.trigger(
                                                     turtle,
                                                     notes[d],
@@ -2765,7 +2765,7 @@ class Singer {
                                                 );
                                             }
                                         } else if (last(tur.singer.instrumentNames)) {
-                                            if (!tur.singer.suppressOutput) {
+                                            if (!tur.singer.suppressOutput && !tur.muted) {
                                                 // If we are in a glide, use setNote after the first note
                                                 if (tur.singer.glide.length > 0) {
                                                     if (tur.singer.glideOverride === 0) {
@@ -2816,7 +2816,7 @@ class Singer {
                                             tur.singer.voices.length > 0 &&
                                             last(tur.singer.voices)
                                         ) {
-                                            if (!tur.singer.suppressOutput) {
+                                            if (!tur.singer.suppressOutput && !tur.muted) {
                                                 activity.logo.synth.trigger(
                                                     turtle,
                                                     notes[d],
@@ -2830,7 +2830,7 @@ class Singer {
                                                 );
                                             }
                                         } else {
-                                            if (!tur.singer.suppressOutput) {
+                                            if (!tur.singer.suppressOutput && !tur.muted) {
                                                 activity.logo.synth.trigger(
                                                     turtle,
                                                     notes[d],
@@ -2931,7 +2931,7 @@ class Singer {
                             if (!forceSilence) {
                                 for (let i = 0; i < drums.length; i++) {
                                     if (tur.singer.drumStyle.length > 0) {
-                                        if (!tur.singer.suppressOutput) {
+                                        if (!tur.singer.suppressOutput && !tur.muted) {
                                             activity.logo.synth.trigger(
                                                 turtle,
                                                 ["C2"],
@@ -2945,7 +2945,7 @@ class Singer {
                                             );
                                         }
                                     } else {
-                                        if (!tur.singer.suppressOutput) {
+                                        if (!tur.singer.suppressOutput && !tur.muted) {
                                             activity.logo.synth.trigger(
                                                 turtle,
                                                 ["C2"],
